@@ -1,0 +1,81 @@
+{% extends "index.html" %}
+
+{% block title %}Inicio de Sesión{% endblock %}
+
+{% block content %}
+
+    {% block contentSubMenu %}
+        <div class="container principal">
+            <div class="container container-header">
+                <h1 style="font-family: cursive; font-size: 22px; ">INGRESAR</h1>
+            </div>  
+            <div class="container">
+                <div class="container container-submenu">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Inicio</a></li>
+                        <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Cuenta</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" style="font-family: cursive;">Usuario o Administrador</li>
+                        </ol>
+                    </nav>
+                </div> 
+            </div>
+
+            {% block registerContainer %}
+                <div class="container container-header-registro" >
+                    <div class="container-registro">
+                        <div class="container-inicios">
+                            <a href="#" class="fa fa-facebook" style="width: 335px;">  Sign in with Facebook</a>
+                        </div>
+                        <div class="container-inicios">
+                            <a href="#" class="fa fa-twitter" style="width: 335px;">  Sign in with Twitter</a>
+                        </div>
+                        <div class="container-inicios">
+                            <a href="#" class="fa fa-google" style="width: 335px;">  Sign in with Google</a>
+                        </div>
+                        <div class="container-inicio">
+                            <a href="#" class="fa fa-instagram" style="width: 335px;">  Sign in with Instagram</a>
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+
+            <div class="container">
+                <div class="row justify-content-center mt-5">
+                    <div class="col-md-6">
+                        <div class="container-form">
+                            <form method="POST" action="{{ url_for('inicioSesion') }}">
+                                <div class="mb-3" style="width: 344px;">
+                                    <label for="correo_electronico" class="form-label" style="font-family: cursive;">Correo Electrónico</label>
+                                    <input type="email" id="correo_electronico" name="correo_electronico" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contrasena" class="form-label" style="font-family: cursive;">Contraseña</label>
+                                    <input type="password" id="contrasena" name="contrasena" class="form-control" required>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-dark" style="font-family: cursive;">Iniciar Sesión</button>
+                                </div>
+                            </form>
+                        </div>
+                            <div class="mt-3 text-center">
+                                <a href="#" class="text-dark" style="font-family: cursive;">¿Olvidaste tu contraseña?</a>
+                            </div>
+                            <div class="container new-customer" style="margin-top: 30px;">
+                                <h3 class="section-tittle" style="font-family: cursive; font-size: 15px;font-weight:bold">¿CLIENTE NUEVO?</h3>
+                                <p style="font-family: cursive;">
+                                    Abre una cuenta para aprovechar el historial de pedidos, 
+                                    guardar tus direcciones y más.
+                                </p>
+                            </div>
+                            <div class="mt-3 text-center" style="font-family: cursive;">
+                                <span>¿No tienes una cuenta? </span><a href="{{ url_for('registro') }}" class="text-dark">Regístrate aquí</a>                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endblock %}
+
+{% endblock %}

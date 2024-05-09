@@ -1,0 +1,6 @@
+Flask
+Jinja2
+SQLAlchemy
+pyodbc
+Werkzeug
+flask-bcrypt
