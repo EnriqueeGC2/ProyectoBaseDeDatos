@@ -1,0 +1,6 @@
+<h2>Productos Disponibles</h2>
+            <ul>
+                {% for producto in productos %}
+                    <li>{{ producto.Nombre }} - Precio: {{ producto.Precio }} - Stock: {{ producto.Stock }} - ID: {{producto.CategoriaID}}</li>
+                {% endfor %}
+            </ul>

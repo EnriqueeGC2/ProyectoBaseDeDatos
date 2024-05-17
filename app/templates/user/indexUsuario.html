@@ -1,0 +1,12 @@
+{% extends "index.html" %}
+
+{% block title %}Inicio de Sesión{% endblock %}
+
+{% block content %}
+
+    <div class="container text-center" style="margin-top: 15px;">
+        <a style="font-family: cursive; font-size: 20px;">Bienvenido al panel de usuario, </a>
+        <a style="text-transform: uppercase; font-family: cursive; font-size: 20px">{{ session['usuario']['nombre'] }} </a>
+    </div>
+
+{% endblock %}

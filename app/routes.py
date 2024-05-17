@@ -1,5 +1,5 @@
 from app import app, render_template
-from flask import request, redirect, url_for, session
+from flask import request, redirect, url_for, session, jsonify
 from flask_bcrypt import Bcrypt
 from flask_bcrypt import check_password_hash
 
@@ -30,38 +30,6 @@ def productosElectronicos():
     productos = ejecutar_consulta(queryProductos)
     return render_template('productosElectronicos.html', productos=productos)
 
-@app.route('/inicio_sesion', methods=['GET', 'POST'])
-def inicioSesion():
-    if request.method == 'POST':
-        correo_electronico = request.form['correo_electronico']
-        contrasena = request.form['contrasena']
-
-        # Buscar al usuario en la base de datos por su correo electrónico
-        query = "SELECT * FROM usuario WHERE correo_electronico = ?"
-        resultado = ejecutar_consulta(query, (correo_electronico,))
-
-        if resultado:
-            usuario = resultado[0]  # Tomamos el primer resultado de la lista
-            # Verificar si la contraseña es correcta
-            if check_password_hash(usuario['contrasena'].strip(), contrasena): #.strip() elimina los espacios en blanco
-                # Iniciar sesión y redirigir al usuario a una página protegida
-                session['usuario'] = usuario
-                return redirect(url_for('pagina_protegida'))
-            else:
-                return "La contraseña es incorrecta. Por favor, inténtalo de nuevo."
-        else:
-            return "El correo electrónico no está registrado. Por favor, regístrate primero."
-
-    return render_template('iniciarSesion.html')
-
-@app.route('/pagina-protegida')
-def pagina_protegida():
-    # Verificar si el usuario está autenticado antes de acceder a esta página
-    if 'usuario' in session:
-        return "¡Bienvenido a la página protegida!"
-    else:
-        return redirect(url_for('inicioSesion'))
-
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
@@ -85,9 +53,63 @@ def registro():
             return "El correo electrónico ya está registrado. Por favor, utiliza otro."
         
         # Insertar el nuevo usuario en la base de datos
-        query_insert = "INSERT INTO Usuario (nombre, apellido, correo_electronico, contrasena) VALUES (?, ?, ?, ?)"
-        ejecutar_consulta(query_insert, (nombre, apellido, correo_electronico, contrasena_segura), fetch_results=False)
+        query_insert = "INSERT INTO Usuario (nombre, apellido, correo_electronico, contrasena, rol) VALUES (?, ?, ?, ?, ?)"
+        ejecutar_consulta(query_insert, (nombre, apellido, correo_electronico, contrasena_segura, 'usuario'), fetch_results=False)
         
         return redirect(url_for('inicioSesion'))  # Redirigir al usuario al inicio de sesión después del registro
     return render_template('registro.html')
+
+@app.route('/inicio_sesion', methods=['GET', 'POST'])
+def inicioSesion():
+    mensaje = ''
+
+    if request.method == 'POST':
+        correo_electronico = request.form['correo_electronico']
+        contrasena = request.form['contrasena']
+
+        # Buscar al usuario en la base de datos por su correo electrónico
+        query = "SELECT * FROM usuario WHERE correo_electronico = ?"
+        resultado = ejecutar_consulta(query, (correo_electronico,))
+
+        if resultado:
+            usuario = resultado[0]  # Tomamos el primer resultado de la lista
+            # Verificar si la contraseña es correcta
+            if check_password_hash(usuario['contrasena'].strip(), contrasena): #.strip() elimina los espacios en blanco
+                # Iniciar sesión y redirigir al usuario a una página protegida
+                session['usuario'] = usuario
+                if usuario['rol'].strip() == 'Administrador':
+                    return redirect(url_for('pagina_protegida_admin'))
+                else:
+                    return redirect(url_for('pagina_protegida'))
+            else:
+                mensaje = "La contraseña es incorrecta. Por favor, inténtalo de nuevo."
+                #return "La contraseña es incorrecta. Por favor, inténtalo de nuevo."
+        else:
+            mensaje = "El correo electrónico no está registrado. Por favor, regístrate primero."
+            #return "El correo electrónico no está registrado. Por favor, regístrate primero."
+    return render_template('iniciarSesion.html', mensaje=mensaje)
+
+@app.route('/pagina-protegida')
+def pagina_protegida():
+    # Verificar si el usuario está autenticado antes de acceder a esta página
+    if 'usuario' in session:
+        print(session['usuario']['nombre'])
+        return render_template('user/indexUsuario.html'), "¡Bienvenido a la página protegida!".format(session['usuario']['nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+
+@app.route('/pagina-protegida-admin')
+def pagina_protegida_admin():
+    # Verificar si el usuario está autenticado antes de acceder a esta página
+    if 'usuario' in session:
+        return render_template('admin/indexAdmin.html'), "¡Bienvenido a la página protegida!".format(session['usuario']['nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+
+@app.route('/cerrar_sesion')
+def cerrarSesion():
+    # Eliminar el nombre del usuario de la sesión al cerrar sesión
+    session.pop('usuario', None)
+    return redirect(url_for('inicioSesion'))
+
 

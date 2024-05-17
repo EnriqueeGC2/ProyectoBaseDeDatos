@@ -245,3 +245,11 @@ ul {
   display: flex;
   justify-content: center;
 }
+
+.header-tools-admin {
+  font-family: cursive;
+  font-size: 17px;
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+}
