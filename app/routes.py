@@ -22,13 +22,13 @@ def index():
 def productos():
     queryProductos = "SELECT * FROM dbo.PRODUCTOS;"
     productos = ejecutar_consulta(queryProductos)
-    return render_template('productos.html', productos=productos)
+    return render_template('products/productos.html', productos=productos)
 
 @app.route('/productos_electronicos')
 def productosElectronicos():
-    queryProductos = "SELECT * FROM dbo.PRODUCTOS WHERE CATEGORIA_ID = 1;"
+    queryProductos = "SELECT * FROM dbo.PRODUCTOS WHERE CATEGORIAID = 1;"
     productos = ejecutar_consulta(queryProductos)
-    return render_template('productosElectronicos.html', productos=productos)
+    return render_template('products/productosElectronicos.html', productos=productos)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -98,18 +98,41 @@ def pagina_protegida():
     else:
         return redirect(url_for('inicioSesion'))
 
-@app.route('/pagina-protegida-admin')
-def pagina_protegida_admin():
-    # Verificar si el usuario está autenticado antes de acceder a esta página
-    if 'usuario' in session:
-        return render_template('admin/indexAdmin.html'), "¡Bienvenido a la página protegida!".format(session['usuario']['nombre'])
-    else:
-        return redirect(url_for('inicioSesion'))
-
 @app.route('/cerrar_sesion')
 def cerrarSesion():
     # Eliminar el nombre del usuario de la sesión al cerrar sesión
     session.pop('usuario', None)
     return redirect(url_for('inicioSesion'))
 
+@app.route('/pagina-protegida-admin')
+def pagina_protegida_admin():
+    # Verificar si el usuario está autenticado antes de acceder a esta página
+    if 'usuario' in session:
+        query = "SELECT * FROM Usuario WHERE rol = 'usuario'"
+        usuarios = ejecutar_consulta(query)
+        return render_template('admin/indexAdmin.html', usuarios=usuarios, nombre=session['usuario']['nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+
+@app.route('/admin/usuarios/eliminar/<int:usuario_id>', methods=['POST'])
+def eliminar_usuario(usuario_id):
+    query = "DELETE FROM Usuario WHERE usuario_id = ?"
+    ejecutar_consulta(query, (usuario_id,), fetch_results=False)
+    return redirect(url_for('pagina_protegida_admin'))
+
+@app.route('/admin/productos')
+def editar_productos():
+    # Verificar si el usuario está autenticado antes de acceder a esta página
+    if 'usuario' in session:
+        query = "SELECT * FROM dbo.PRODUCTOS;"
+        productos = ejecutar_consulta(query)
+        return render_template('admin/productos.html', productos=productos, nombre=session['usuario']['nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+
+@app.route('/admin/producto/eliminar/<int:productoID>', methods=['POST'])
+def eliminar_producto(productoID):
+    query = "DELETE FROM Productos WHERE ProductoID = ?"
+    ejecutar_consulta(query, (productoID,), fetch_results=False)
+    return redirect(url_for('editar_productos'))
 

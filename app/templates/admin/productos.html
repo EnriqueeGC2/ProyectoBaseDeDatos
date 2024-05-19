@@ -1,6 +1,66 @@
-<h2>Productos Disponibles</h2>
-            <ul>
-                {% for producto in productos %}
-                    <li>{{ producto.Nombre }} - Precio: {{ producto.Precio }} - Stock: {{ producto.Stock }} - ID: {{producto.CategoriaID}}</li>
-                {% endfor %}
-            </ul>
+{% extends 'admin/indexAdmin.html' %}
+
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h2>Lista de Productos</h2>
+    <button onclick="document.getElementById('form-agregar').style.display='block'">Agregar Producto</button>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">NOMBRE</th>
+                <th scope="col">DESCRIPCION</th>
+                <th scope="col">PRECIO</th>
+                <th scope="col">STOCK</th>
+                <th scope="col">IMAGEN</th>
+                <th scope="col">ACCIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td>{{ producto['ProductoID'] }}</td>
+                <td>{{ producto['Nombre'] }}</td>
+                <td>{{ producto['Descripcion'] }}</td>
+                <td>{{ producto['Precio'] }}</td>
+                <td>{{ producto['Stock'] }}</td>
+                <td>{{ producto['url_imagen'] }}</td>
+                <td>
+                    <form action="{{ url_for('eliminar_producto', productoID=producto['ProductoID']) }}" method="post"
+                    style="display:inline;">
+                        <input type="hidden" name="productoID" value="{{ producto['ProductoID'] }}">
+                            <button class="btn btn-danger" type="submit">Eliminar</button>
+                    </form>
+                        <button class="btn btn-info" type="submit">Actualizar</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Formulario para agregar producto -->
+    <div id="form-agregar" style="display:none;">
+        <h2>Agregar Producto</h2>
+        <form action="" method="post">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+            <label for="descripcion">Descripcion:</label>
+            <input type="text" id="descripcion" name="descripcion" required>
+            <label for="precio">Precio:</label>
+            <input type="number" id="precio" name="precio" step="0.01" required>
+            <label for="stock">Stock:</label>
+            <input type="number" id="stock" name="stock" required>
+            <label for="categoria_id">Categoria ID:</label>
+            <input type="number" id="categoria_id" name="categoria_id" required>
+            <label for="url_imagen">URL Imagen:</label>
+            <input type="text" id="url_imagen" name="url_imagen" required>
+            <button type="submit">Agregar</button>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}
