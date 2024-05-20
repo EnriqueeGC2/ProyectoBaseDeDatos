@@ -34,15 +34,15 @@
                                          -->
                                         <li class="nav-item dropdown col-md-4">
                                             <button class="btn btn-ligth dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle navigation" style="font-family: cursive; font-size: 17px; text-transform: uppercase;">
-                                            {% if 'usuario' in session %}
-                                                {{ session['usuario']['nombre'] }}
+                                            {% if 'user' in session %}
+                                                {{ session['user']['primer_nombre'] }}
                                             {% else %}
                                                 CUENTA
                                             {% endif %}
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-ligth">
-                                                {% if 'usuario' in session %}
-                                                    <li><a class="dropdown-item" href="/">MI PERFIL</a></li>
+                                                {% if 'user' in session %}
+                                                    <li><a class="dropdown-item" href="{{ url_for('pagina_protegida') }}">MI PERFIL</a></li>
                                                     <li><a class="dropdown-item" href="{{ url_for('cerrarSesion') }}">CERRAR SESION</a></li>
                                                 {% else %}
                                                     <li><a class="dropdown-item" href="{{ url_for('inicioSesion') }}">ADMINISTRADOR O USUARIO</a></li>
@@ -158,9 +158,9 @@
                             <img src="{{ url_for('static', filename='img/' + producto.url_imagen) }}" alt="{{ producto.Nombre }}">
                             <div class="producto-overlay">
                                 <div class="producto-info">
-                                    <h3>{{ producto.Nombre }}</h3>
-                                    <p>Stock: {{ producto.Stock }}</p>
-                                    <p>Precio: ${{ producto.Precio }}</p>
+                                    <h3>{{ producto.nombre_producto }}</h3>
+                                    <p>Stock: {{ producto.stock }}</p>
+                                    <p>Precio: ${{ producto.precio }}</p>
                                     <div class="producto-buttons">
                                         <button class="btn">Añadir al carrito</button>
                                         <button class="btn">Comprar</button>

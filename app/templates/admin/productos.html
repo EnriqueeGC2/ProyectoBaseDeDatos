@@ -13,8 +13,10 @@
                 <th scope="col">#</th>
                 <th scope="col">NOMBRE</th>
                 <th scope="col">DESCRIPCION</th>
+                <th scope="col">MARCA</th>
                 <th scope="col">PRECIO</th>
                 <th scope="col">STOCK</th>
+                <th scope="col">SUBCATEGORIA ID</th>
                 <th scope="col">IMAGEN</th>
                 <th scope="col">ACCIONES</th>
             </tr>
@@ -22,16 +24,18 @@
         <tbody>
             {% for producto in productos %}
             <tr>
-                <td>{{ producto['ProductoID'] }}</td>
-                <td>{{ producto['Nombre'] }}</td>
-                <td>{{ producto['Descripcion'] }}</td>
-                <td>{{ producto['Precio'] }}</td>
-                <td>{{ producto['Stock'] }}</td>
+                <td>{{ producto['producto_id'] }}</td>
+                <td>{{ producto['nombre_producto'] }}</td>
+                <td>{{ producto['detalles'] }}</td>
+                <td>{{ producto['marca'] }}</td>
+                <td>{{ producto['precio'] }}</td>
+                <td>{{ producto['stock'] }}</td>
+                <td>{{ producto['subcategoria_id'] }}</td>
                 <td>{{ producto['url_imagen'] }}</td>
                 <td>
-                    <form action="{{ url_for('eliminar_producto', productoID=producto['ProductoID']) }}" method="post"
+                    <form action="{{ url_for('eliminar_producto', producto_id=producto['producto_id']) }}" method="post"
                     style="display:inline;">
-                        <input type="hidden" name="productoID" value="{{ producto['ProductoID'] }}">
+                        <input type="hidden" name="producto_id" value="{{ producto['producto_id'] }}">
                             <button class="btn btn-danger" type="submit">Eliminar</button>
                     </form>
                         <button class="btn btn-info" type="submit">Actualizar</button>

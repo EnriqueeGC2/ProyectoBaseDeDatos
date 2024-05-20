@@ -42,8 +42,8 @@
             {% for usuario in usuarios %}
             <tr>
                 <td>{{ usuario['usuario_id'] }}</td>
-                <td>{{ usuario['nombre'] }}</td>
-                <td>{{ usuario['apellido'] }}</td>
+                <td>{{ usuario['primer_nombre'] }}</td>
+                <td>{{ usuario['primer_apellido'] }}</td>
                 <td>{{ usuario['correo_electronico'] }}</td>
                 <td>
                     <form action="{{ url_for('eliminar_usuario', usuario_id=usuario['usuario_id']) }}" method="post"

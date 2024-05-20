@@ -4,5 +4,32 @@
 
 {% block content %}
 
+<div class="container text-center" style="margin-top: -30px;">
+    <div class="container">
+        <a style="font-family: cursive;">Bienvenido a tu perfil, </a><a
+            style="text-transform: uppercase; font-family: cursive;">{{ nombre }} </a>
+    </div>
+    <div class="row">
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('pagina_protegida_admin') }}">INFORMACION DE LA CUENTA</a>
+        </div>
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('editar_productos') }}">HISTORIAL DE COMPRAS</a>
+        </div>
+        <div class="col">
+            <a class="header-tools-admin" href="">DESCUENTOS</a>
+        </div>
+    </div>
+    <div class="card" style="font-family: cursive; margin-top:20px;">
+        <div class="card-header" style="text-align:left">
+            {% if 'user' in session %}
+            <p>{{ session['user']['primer_nombre'] }} {{session['user']['primer_apellido']}}</p>
+            <p> Cuenta ID: {{ session['user']['usuario_id'] }}</p>
+            <p>Correo Electrónico: {{ session['user']['correo_electronico'] }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {{ cliente }}
+</div>
 
 {% endblock %}
