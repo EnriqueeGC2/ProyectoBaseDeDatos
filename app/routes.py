@@ -18,17 +18,35 @@ def index():
     productos = ejecutar_consulta(queryProductos)
     return render_template('index.html', categorias=categorias, productos=productos)
 
-@app.route('/productos')
-def productos():
-    queryProductos = "SELECT * FROM productos;"
-    productos = ejecutar_consulta(queryProductos)
-    return render_template('products/productos.html', productos=productos)
-
 @app.route('/productos_electronicos')
 def productosElectronicos():
-    queryProductos = "SELECT * FROM productos WHERE subcategoria_id = 1;"
+    queryProductos = "SELECT * FROM productos WHERE subcategoria_id = 1 OR subcategoria_id = 2 OR subcategoria_id = 3;"
     productos = ejecutar_consulta(queryProductos)
     return render_template('products/productosElectronicos.html', productos=productos)
+
+@app.route('/productos_hogar')
+def productos_hogar():
+    queryProductos = "SELECT * FROM productos WHERE subcategoria_id = 13 OR subcategoria_id = 14 OR subcategoria_id = 15;"
+    productosHogar = ejecutar_consulta(queryProductos)
+    return render_template('products/productosHogar.html', productosHogar=productosHogar)
+
+@app.route('/productos_ropa')
+def productos_ropa():
+    queryProductos = "SELECT * FROM productos WHERE subcategoria_id = 4 OR subcategoria_id = 5 OR subcategoria_id = 6;"
+    productos = ejecutar_consulta(queryProductos)
+    return render_template('products/productosRopa.html', productos=productos)
+
+@app.route('/productos_juguetes')
+def productos_juguetes():
+    queryProductos = "SELECT * FROM productos WHERE subcategoria_id = 7 OR subcategoria_id = 8 OR subcategoria_id = 9;"
+    productos = ejecutar_consulta(queryProductos)
+    return render_template('products/productosJuguetes.html', productos=productos)
+
+@app.route('/productos_deportes')
+def productos_deportes():
+    queryProductos = "SELECT * FROM productos WHERE subcategoria_id = 10 OR subcategoria_id = 11 OR subcategoria_id = 12;"
+    productos = ejecutar_consulta(queryProductos)
+    return render_template('products/productosDeportes.html', productos=productos)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -123,13 +141,22 @@ def cerrarSesion():
 def pagina_protegida_admin():
     # Verificar si el usuario está autenticado antes de acceder a esta página
     if 'user' in session:
+        usuario_id = session['user']['usuario_id']
+        # Seleccionar todos los usuarios que no sean administradores
         query = "SELECT * FROM Usuarios WHERE rol = 'user'"
         usuarios = ejecutar_consulta(query)
-        return render_template('admin/indexAdmin.html', usuarios=usuarios, nombre=session['user']['primer_nombre'])
+        # Seleccionar todos la informacion de lo clientes
+        query = "SELECT * FROM Clientes WHERE usuario_id = ?"
+        clientes = ejecutar_consulta(query, (usuario_id,))    
+        return render_template('admin/indexAdmin.html', usuarios=usuarios, clientes=clientes,nombre=session['user']['primer_nombre'])
 
 @app.route('/admin/usuarios/eliminar/<int:usuario_id>', methods=['POST'])
 def eliminar_usuario(usuario_id):
-    query = "DELETE FROM Usuario WHERE usuario_id = ?"
+    # Eliminar al usuario de la base de datos
+    query = "DELETE FROM Usuarios WHERE usuario_id = ?"
+    ejecutar_consulta(query, (usuario_id,), fetch_results=False)
+    # Eliminar al cliente de la base de datos
+    query = "DELETE FROM Clientes WHERE usuario_id = ?"
     ejecutar_consulta(query, (usuario_id,), fetch_results=False)
     return redirect(url_for('pagina_protegida_admin'))
 
@@ -137,9 +164,19 @@ def eliminar_usuario(usuario_id):
 def editar_productos():
     # Verificar si el usuario está autenticado antes de acceder a esta página
     if 'user' in session:
+        # Obtener todos los productos de la base de datos
         query = "SELECT * FROM dbo.PRODUCTOS;"
         productos = ejecutar_consulta(query)
-        return render_template('admin/productos.html', productos=productos, nombre=session['user']['primer_nombre'])
+
+        # Obtener todas las categorías de la base de datos
+        query_categorias = "SELECT * FROM dbo.CATEGORIAS;"
+        categorias = ejecutar_consulta(query_categorias)
+
+        # Obtener todas las subcategorías de la base de datos
+        query_subcategorias = "SELECT * FROM dbo.SUBCATEGORIAS;"
+        subcategorias = ejecutar_consulta(query_subcategorias)
+
+        return render_template('admin/productos.html', productos=productos, categorias=categorias, subcategorias=subcategorias, nombre=session['user']['primer_nombre'])
     else:
         return redirect(url_for('inicioSesion'))
 
@@ -147,5 +184,20 @@ def editar_productos():
 def eliminar_producto(productoID):
     query = "DELETE FROM Productos WHERE producto_id = ?"
     ejecutar_consulta(query, (productoID,), fetch_results=False)
+    return redirect(url_for('editar_productos'))
+
+@app.route('/admin/producto/agregar', methods=['POST'])
+def agregar_producto():
+    nombre = request.form['nombre_producto']
+    detalles = request.form['detalles']
+    marca = request.form['marca']
+    precio = request.form['precio']
+    stock = request.form['stock']
+    subcategoria_id = request.form['subcategoria_id']
+    url_imagen = request.form['url_imagen']
+
+    query = "INSERT INTO Productos (nombre_producto, detalles, marca, precio, stock, subcategoria_id, url_imagen) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    ejecutar_consulta(query, (nombre, detalles, marca, precio, stock, subcategoria_id, url_imagen), fetch_results=False)
+
     return redirect(url_for('editar_productos'))
 

@@ -26,33 +26,45 @@
 
 {% block content %}
 
-<div class="container">
+<div class="container" style="margin-top: -30px;">
     <h2>Lista de Usuarios</h2>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">#</th>
-                <th scope="col">NOMBRE</th>
-                <th scope="col">APELLIDO</th>
+                <th scope="col">ID</th>
+                <th scope="col">PRIMER NOMBRE</th>
+                <th scope="col">SEGUNDO NOMBRE</th>
+                <th scope="col">PRIMER APELLIDO</th>
+                <th scope="col">SEGUNDO APELLIDO</th>
                 <th scope="col">CORREO ELECTRONICO</th>
+                <th scope="col">TELEFONO</th>
+                <th scope="col">DPI</th>
+                <th scope="col">DIRECCION</th>
                 <th scope="col">ACCIONES</th>
             </tr>
         </thead>
         <tbody>
             {% for usuario in usuarios %}
-            <tr>
-                <td>{{ usuario['usuario_id'] }}</td>
-                <td>{{ usuario['primer_nombre'] }}</td>
-                <td>{{ usuario['primer_apellido'] }}</td>
-                <td>{{ usuario['correo_electronico'] }}</td>
-                <td>
-                    <form action="{{ url_for('eliminar_usuario', usuario_id=usuario['usuario_id']) }}" method="post"
-                        style="display:inline;">
-                        <input type="hidden" name="usuario_id" value="{{ usuario['id'] }}">
-                        <button class="btn btn-danger" type="submit">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ usuario['usuario_id'] }} </td>
+                    <td>{{ usuario['primer_nombre']}} </td>
+                    <td>{{ cliente['segundo_nombre'] }}</td>
+                    <td>{{ usuario['primer_apellido'] }} </td>
+                    <td>{{ cliente['segundo_apellido'] }}</td>
+                    <td>{{ usuario['correo_electronico'] }}</td>
+                    <td>{{ cliente['numero_telefono'] }}</td>
+                    <td>{{ cliente['dpi'] }}</td>
+                    <td>{{ cliente['direccion'] }}</td>
+                    <td>
+                        <form action="{{ url_for('eliminar_usuario', usuario_id=usuario['usuario_id']) }}" method="post"
+                            style="display:inline;">
+                            <input type="hidden" name="usuario_id" value="{{ usuario['id'] }}">
+                            <button class="btn btn-danger" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
             {% endfor %}
         </tbody>
     </table>

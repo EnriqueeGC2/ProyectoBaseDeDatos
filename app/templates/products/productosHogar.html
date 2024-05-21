@@ -1,19 +1,19 @@
 {% extends "index.html" %}
 
-{% block title %}Juguetes{% endblock %}
+{% block title %}Hogar{% endblock %}
 
 {% block content %}
 
     <div class="container principal">
         <div class="container container-header" style="margin-top: -30px;">
-            <h1 style="font-family: cursive; font-size: 22px; ">Productos Disponibles</h1>
+            <h1 style="font-family: cursive; font-size: 22px; ">Productos Para Hogar Disponibles</h1>
         </div>  
         <div class="container">
             <div class="container container-submenu" >
                 <nav aria-label="breadcrumb" >
                     <ol class="breadcrumb" style="margin-top: -50px;">
                     <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Inicio</a></li>
-                    <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Juguetes</a></li>
+                    <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Hogar</a></li>
                     </ol>
                 </nav>
             </div> 
@@ -22,7 +22,7 @@
 
     <div class="container text-center" style="margin-top: -50px;">
         <div class="productos-grids">
-            {% for producto in productos %}
+            {% for producto in productosHogar %}
             <div class="producto-cards">
                 <div class="producto-images">
                     <img src="{{ url_for('static', filename='img/' + producto.url_imagen) }}" alt="{{ producto.Nombre }}">
