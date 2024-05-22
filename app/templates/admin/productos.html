@@ -11,7 +11,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">#</th>
+                <th scope="col">ID</th>
                 <th scope="col">NOMBRE</th>
                 <th scope="col">DESCRIPCION</th>
                 <th scope="col">MARCA</th>
@@ -39,7 +39,7 @@
                         <input type="hidden" name="producto_id" value="{{ producto['producto_id'] }}">
                         <button class="btn btn-danger" type="submit">Eliminar</button>
                     </form>
-                    <button class="btn btn-info" type="submit">Actualizar</button>
+                    <button class="btn btn-info" type="submit">Editar</button>
                 </td>
             </tr>
             {% endfor %}
@@ -97,7 +97,6 @@
                                 <th scope="col">#</th>
                                 <th scope="col">Subcategoria</th>
                                 <th scope="col">Subcategoria ID</th>
-                                <th scope="col">Categoria</th>
                                 <th scope="col">Categoria ID</th>
                             </tr>
                           </thead>
@@ -107,7 +106,6 @@
                                 <td> {{ loop.index0 + 1 }} </td>
                                 <td> {{subcategoria['nombre'] }} </td>
                                 <td> {{subcategoria['subcategoria_id']}} </td>
-                                <td> {{categorias['nombre'] }} </td>
                                 <td> {{subcategoria['categoria_id']}}</td>
                             </tr>
                           {% endfor %}

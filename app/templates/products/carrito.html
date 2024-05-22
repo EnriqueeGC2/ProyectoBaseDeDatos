@@ -1,0 +1,76 @@
+{% extends 'index.html' %}
+
+{% block title %}Tu Carrito{% endblock %}
+
+{% block content %}
+
+<div class="container principal">
+    <div class="container container-header" style="margin-top: -30px;">
+        <h1 style="font-family: cursive; font-size: 22px; ">CARRITO</h1>
+    </div>  
+    <div class="container">
+        <div class="container container-submenu" >
+            <nav aria-label="breadcrumb" >
+                <ol class="breadcrumb" style="margin-top: -50px;">
+                <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Inicio</a></li>
+                <li class="breadcrumb-item"><a class="submenu-inicio-sesion" href="/">Carrito</a></li>
+                </ol>
+            </nav>
+        </div> 
+    </div>
+</div>
+<div class="container" style="margin-top: -50px;">
+    <div class="container container-carrito">
+        <table class="table-carrito">
+            <thead class="tead-carrito">
+                <tr style="background: whitesmoke;"">
+                    <th class="th-carrito">PRODUCTO</th>
+                    <th class="th-carrito">PRECIO</th>
+                    <th class="th-carrito">CANTIDAD</th>
+                    <th class="th-carrito">Total</th>
+                    <th class="th-carrito"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items_carrito %}
+                <tr>
+                    <td class="products-details">
+                        <img src="{{ url_for('static', filename='img/' + item['url_imagen']) }}" alt="{{ item['nombre_producto'] }}" class="imagen-carrito">
+                        <div class="product-info">
+                            <p>{{ item['nombre_producto'] }}</p>
+                        </div>
+                    </td>
+                    <td>${{ item['precio_unitario'] }}</td>
+                    <td>
+                        <div class="container">
+                            <form action="{{ url_for('actualizar_carrito', producto_id=item.producto_id) }}" method="post">
+                                <input type="number" name="cantidad" value="{{ item['cantidad'] }}" min="1" >
+                                <button type="submit" class="btn-actualizar" style="margin-left: -74px;">Actualizar</button>
+                            </form>
+                        </div>
+                    </td>
+                    
+                    <td>${{ item['total'] }}</td>
+                    <td>
+                        <form action="{{ url_for('eliminar_carrito', producto_id=item.producto_id) }}" method="post">
+                            <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="total">
+        <a href="/">Seguir Comprando</a>
+        <h2>Total: ${{ total }}</h2>
+    </div>
+    <div class="container" style="text-align: right;">
+        <form action="{{ url_for('comprar') }}" method="post">
+            <button type="submit" >Comprar</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

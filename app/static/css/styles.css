@@ -484,3 +484,86 @@ body {
   font-size: 14px;
 }
 
+/* Diseno de productos del carrito de compras */
+
+
+.container-carrito {
+  width: 80%;
+  max-width: 800px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.table-carrito {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thead-carrito {
+  background-color: #f9f9f9;
+}
+
+.th-carrito, .td-products-details {
+  padding: 15px;
+  text-align: left;
+}
+
+.th-carrito {
+  font-size: 16px;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.product-details {
+  display: flex;
+  align-items: center;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-info p {
+  margin: 0;
+}
+
+input[type="number"] {
+  width: 60px;
+  padding: 5px;
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #001f54;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #0051c3;
+}
+
+.imagen-carrito {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.btn-actualizar {
+  float: right;
+  margin-top: -38px;
+}

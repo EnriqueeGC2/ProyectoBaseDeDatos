@@ -52,7 +52,7 @@
                                         </li>
                                     </div>
                                     <div class="mini-cart">
-                                        <a class="nav-link" href="">
+                                        <a class="nav-link" href="{{ url_for('ver_carrito') }}">
                                             <span class="cart-count-text" style="font-family: cursive; font-size: 17px;">CARRITO</span>
                                             (
                                             <span class="cart-count-number" style="font-family: cursive; font-size: 17px;">0</span>
@@ -150,28 +150,32 @@
         </section>
         <main>
         {% block content %}
-            <div class="container text-center">
-                <div class="productos-grid">
-                    {% for producto in productos %}
-                    <div class="producto-card">
-                        <div class="producto-image">
-                            <img src="{{ url_for('static', filename='img/' + producto.url_imagen) }}" alt="{{ producto.Nombre }}">
-                            <div class="producto-overlay">
-                                <div class="producto-info">
-                                    <h3>{{ producto.nombre_producto }}</h3>
-                                    <p>Stock: {{ producto.stock }}</p>
-                                    <p>Precio: ${{ producto.precio }}</p>
-                                    <div class="producto-buttons">
-                                        <button class="btn">Añadir al carrito</button>
-                                        <button class="btn">Comprar</button>
-                                    </div>
+        <div class="container text-center">
+            <div class="productos-grid">
+                {% for producto in productos %}
+                <div class="producto-card">
+                    <div class="producto-image">
+                        <img src="{{ url_for('static', filename='img/' + producto.url_imagen) }}" alt="{{ producto.Nombre }}">
+                        <div class="producto-overlay">
+                            <div class="producto-info">
+                                <h3>{{ producto.nombre_producto }}</h3>
+                                <p>Stock: {{ producto.stock }}</p>
+                                <p>Precio: ${{ producto.precio }}</p>
+                                <div class="producto-buttons">
+                                    <form action="{{ url_for('agregar_carrito', producto_id=producto.producto_id) }}" method="post">
+                                        <input type="hidden" name="cantidad" value="1"> <!-- Valor por defecto de 1, puedes cambiar esto -->
+                                        <button type="submit" class="btn">Añadir al carrito</button>
+                                    </form>
+                                    <button class="btn">Comprar</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
+        </div>
+        
     {% endblock %}    
     </main>
        <footer>

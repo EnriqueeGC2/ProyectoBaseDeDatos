@@ -72,8 +72,8 @@ def ejecutar_consulta(query, args=None, fetch_results=True):
             conexion.close()
     else:
         return None
-
+"""
 # Prueba
-query = "SELECT * FROM tiendaenlinea.empleados;"
+""" query = "SELECT * FROM tiendaenlinea.empleados;"
 resultados = ejecutar_consulta("SELECT * FROM empleados;")
-print(resultados) """
+print(resultados)  """

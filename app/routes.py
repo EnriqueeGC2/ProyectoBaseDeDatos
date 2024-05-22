@@ -2,6 +2,7 @@ from app import app, render_template
 from flask import request, redirect, url_for, session, jsonify
 from flask_bcrypt import Bcrypt
 from flask_bcrypt import check_password_hash
+from datetime import datetime
 
 #from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -141,14 +142,19 @@ def cerrarSesion():
 def pagina_protegida_admin():
     # Verificar si el usuario está autenticado antes de acceder a esta página
     if 'user' in session:
-        usuario_id = session['user']['usuario_id']
-        # Seleccionar todos los usuarios que no sean administradores
-        query = "SELECT * FROM Usuarios WHERE rol = 'user'"
-        usuarios = ejecutar_consulta(query)
-        # Seleccionar todos la informacion de lo clientes
-        query = "SELECT * FROM Clientes WHERE usuario_id = ?"
-        clientes = ejecutar_consulta(query, (usuario_id,))    
-        return render_template('admin/indexAdmin.html', usuarios=usuarios, clientes=clientes,nombre=session['user']['primer_nombre'])
+        # Seleccionar todos los usuarios que no sean administradores y sus datos de Clientes
+        query = """
+        SELECT Usuarios.usuario_id, Usuarios.primer_nombre, Usuarios.primer_apellido, Usuarios.correo_electronico, 
+               Clientes.segundo_nombre, Clientes.segundo_apellido, Clientes.numero_telefono, Clientes.dpi, Clientes.direccion
+        FROM Usuarios
+        LEFT JOIN Clientes ON Usuarios.usuario_id = Clientes.usuario_id
+        WHERE Usuarios.rol = 'user'
+        """
+        usuarios_clientes = ejecutar_consulta(query)
+        
+        return render_template('admin/indexAdmin.html', usuarios_clientes=usuarios_clientes, nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('login'))  # Redirigir a login si el usuario no está en sesión
 
 @app.route('/admin/usuarios/eliminar/<int:usuario_id>', methods=['POST'])
 def eliminar_usuario(usuario_id):
@@ -160,6 +166,26 @@ def eliminar_usuario(usuario_id):
     ejecutar_consulta(query, (usuario_id,), fetch_results=False)
     return redirect(url_for('pagina_protegida_admin'))
 
+@app.route('/admin/usuarios/agregar-informacion', methods=['POST'])
+def agregar_info_cliente():
+    if 'user' in session:
+        usuario_id = session['user']['usuario_id']
+        segundo_nombre = request.form['segundo_nombre']
+        segundo_apellido = request.form['segundo_apellido']
+        direccion = request.form['direccion']
+        numero_telefono = request.form['numero_telefono']
+        dpi = request.form['dpi']
+
+        query = """
+        UPDATE Clientes
+        SET segundo_nombre = ?, segundo_apellido = ?, direccion = ?, numero_telefono = ?, dpi = ?
+        WHERE usuario_id = ?
+        """
+        ejecutar_consulta(query, (segundo_nombre, segundo_apellido, direccion, numero_telefono, dpi, usuario_id), fetch_results=False)
+        return redirect(url_for('pagina_protegida'))
+    else:
+        return redirect(url_for('login'))  # Redirigir a login si el usuario no está en sesión
+
 @app.route('/admin/productos')
 def editar_productos():
     # Verificar si el usuario está autenticado antes de acceder a esta página
@@ -168,22 +194,17 @@ def editar_productos():
         query = "SELECT * FROM dbo.PRODUCTOS;"
         productos = ejecutar_consulta(query)
 
-        # Obtener todas las categorías de la base de datos
-        query_categorias = "SELECT * FROM dbo.CATEGORIAS;"
-        categorias = ejecutar_consulta(query_categorias)
-
         # Obtener todas las subcategorías de la base de datos
         query_subcategorias = "SELECT * FROM dbo.SUBCATEGORIAS;"
         subcategorias = ejecutar_consulta(query_subcategorias)
-
-        return render_template('admin/productos.html', productos=productos, categorias=categorias, subcategorias=subcategorias, nombre=session['user']['primer_nombre'])
+        return render_template('admin/productos.html', productos=productos, subcategorias=subcategorias, nombre=session['user']['primer_nombre'])
     else:
         return redirect(url_for('inicioSesion'))
 
 @app.route('/admin/producto/eliminar/<int:producto_id>', methods=['POST'])
-def eliminar_producto(productoID):
+def eliminar_producto(producto_id):
     query = "DELETE FROM Productos WHERE producto_id = ?"
-    ejecutar_consulta(query, (productoID,), fetch_results=False)
+    ejecutar_consulta(query, (producto_id,), fetch_results=False)
     return redirect(url_for('editar_productos'))
 
 @app.route('/admin/producto/agregar', methods=['POST'])
@@ -201,3 +222,146 @@ def agregar_producto():
 
     return redirect(url_for('editar_productos'))
 
+# CARRITO Y BOTON DE COMPRAS
+@app.route('/agregar_carrito/<int:producto_id>', methods=['POST'])
+def agregar_carrito(producto_id):
+    usuario_id = session['user']['usuario_id']  # Obtener cliente_id de la sesión
+    if not usuario_id:
+        return redirect(url_for('inicioSesion'))
+
+    cantidad = int(request.form.get('cantidad', 1))
+
+    # Verificar si el carrito existe para el cliente
+    query_carrito = "SELECT carrito_id FROM Carrito WHERE usuario_id = ?"
+    carrito = ejecutar_consulta(query_carrito, (usuario_id,))
+
+    if not carrito:
+        query_crear_carrito = "INSERT INTO Carrito (usuario_id) OUTPUT INSERTED.carrito_id VALUES (?)"
+        carrito_id = ejecutar_consulta(query_crear_carrito, (usuario_id,), fetch_results=True)[0]['carrito_id']
+    else:
+        carrito_id = carrito[0]['carrito_id']
+
+    # Obtener el precio del producto
+    query_producto = "SELECT precio FROM Productos WHERE producto_id = ?"
+    producto = ejecutar_consulta(query_producto, (producto_id,))[0]
+    precio_unitario = producto['precio']
+
+    # Insertar producto en el carrito
+    query_detalle = """
+    INSERT INTO DetallesCarrito (carrito_id, producto_id, cantidad, precio_unitario)
+    VALUES (?, ?, ?, ?)
+    """
+    ejecutar_consulta(query_detalle, (carrito_id, producto_id, cantidad, precio_unitario), fetch_results=False)
+
+    return redirect(url_for('ver_carrito'))
+
+@app.route('/carrito')
+def ver_carrito():
+    usuario_id = session['user']['usuario_id']  # Suponiendo que el cliente está en la sesión
+    query_carrito = """
+    SELECT dc.producto_id, p.nombre_producto, dc.cantidad, dc.precio_unitario, p.url_imagen,
+           (dc.cantidad * dc.precio_unitario) AS total
+    FROM Carrito c
+    JOIN DetallesCarrito dc ON c.carrito_id = dc.carrito_id
+    JOIN Productos p ON dc.producto_id = p.producto_id
+    WHERE c.usuario_id = ?
+    """
+    items_carrito = ejecutar_consulta(query_carrito, (usuario_id,))
+    total = sum(item['total'] for item in items_carrito) if items_carrito else 0
+    
+    return render_template('products/carrito.html', items_carrito=items_carrito, total=total)
+
+# Ruta para actualizar la cantidad de un producto en el carrito
+@app.route('/actualizar_carrito/<int:producto_id>', methods=['POST'])
+def actualizar_carrito(producto_id):
+    usuario_id = session['user']['usuario_id']  # Suponiendo que el cliente está en la sesión
+    nueva_cantidad = int(request.form.get('cantidad'))
+    
+    query_carrito = "SELECT carrito_id FROM Carrito WHERE usuario_id = ?"
+    carrito = ejecutar_consulta(query_carrito, (usuario_id,))
+    carrito_id = carrito[0]['carrito_id']
+    
+    query_actualizar = """
+    UPDATE DetallesCarrito
+    SET cantidad = ?
+    WHERE carrito_id = ? AND producto_id = ?
+    """
+    ejecutar_consulta(query_actualizar, (nueva_cantidad, carrito_id, producto_id), fetch_results=False)
+    
+    return redirect(url_for('ver_carrito'))
+
+@app.route('/eliminar_carrito/<int:producto_id>', methods=['POST'])
+def eliminar_carrito(producto_id):
+    usuario_id = session['user']['usuario_id']
+    if not usuario_id:
+        return redirect(url_for('inicioSesion'))
+
+    query_carrito = "SELECT carrito_id FROM Carrito WHERE usuario_id = ?"
+    carrito = ejecutar_consulta(query_carrito, (usuario_id,))
+    if not carrito:
+        return redirect(url_for('ver_carrito'))
+
+    carrito_id = carrito[0]['carrito_id']
+
+    query_eliminar = "DELETE FROM DetallesCarrito WHERE carrito_id = ? AND producto_id = ?"
+    ejecutar_consulta(query_eliminar, (carrito_id, producto_id), fetch_results=False)
+
+    return redirect(url_for('ver_carrito'))
+
+@app.route('/comprar', methods=['POST'])
+def comprar():
+    usuario_id = session['user']['usuario_id']
+    if not usuario_id:
+        return redirect(url_for('inicioSesion'))
+
+    # Obtener el cliente_id a partir del usuario_id
+    query_cliente = "SELECT cliente_id FROM Clientes WHERE usuario_id = ?"
+    cliente = ejecutar_consulta(query_cliente, (usuario_id,))
+    if not cliente:
+        print("Cliente no encontrado para usuario_id:", usuario_id)  # Depuración
+        return redirect(url_for('ver_carrito'))
+
+    cliente_id = cliente[0]['cliente_id']
+    print("Cliente ID:", cliente_id)  # Depuración
+
+    # Obtener los productos en el carrito
+    query_carrito = """
+    SELECT dc.producto_id, dc.cantidad, dc.precio_unitario
+    FROM Carrito c
+    JOIN DetallesCarrito dc ON c.carrito_id = dc.carrito_id
+    WHERE c.usuario_id = ?
+    """
+    items_carrito = ejecutar_consulta(query_carrito, (cliente_id,))
+    if not items_carrito:
+        print("No se encontraron productos en el carrito para cliente_id:", cliente_id)  # Depuración
+        return redirect(url_for('ver_carrito'))
+
+    # Calcular el total de la venta
+    total_venta = sum(item['cantidad'] * item['precio_unitario'] for item in items_carrito)
+
+    # Insertar la venta en la tabla Ventas
+    query_venta = "INSERT INTO Ventas (cliente_id, fecha_venta, total_venta) OUTPUT INSERTED.venta_id VALUES (?, GETDATE(), ?)"
+    venta = ejecutar_consulta(query_venta, (cliente_id, total_venta), fetch_results=True)
+    if not venta:
+        print("Error al insertar la venta para cliente_id:", cliente_id)  # Depuración
+        return redirect(url_for('ver_carrito'))
+
+    venta_id = venta[0]['venta_id']
+
+    # Insertar los detalles de la venta
+    query_detalles_venta = """
+    INSERT INTO DetallesVenta (venta_id, producto_id, cantidad, precio_unitario)
+    VALUES (?, ?, ?, ?)
+    """
+    for item in items_carrito:
+        ejecutar_consulta(query_detalles_venta, (venta_id, item['producto_id'], item['cantidad'], item['precio_unitario']), fetch_results=False)
+
+    # Insertar la factura
+    query_factura = "INSERT INTO Facturas (venta_id, fecha_factura, total) VALUES (?, GETDATE(), ?)"
+    ejecutar_consulta(query_factura, (venta_id, total_venta), fetch_results=False)
+
+    # Vaciar el carrito
+    query_vaciar_carrito = "DELETE FROM DetallesCarrito WHERE carrito_id = (SELECT carrito_id FROM Carrito WHERE usuario_id = ?)"
+    ejecutar_consulta(query_vaciar_carrito, (usuario_id,), fetch_results=False)
+
+    return redirect(url_for('ver_carrito'))

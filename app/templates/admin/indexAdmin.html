@@ -44,18 +44,17 @@
             </tr>
         </thead>
         <tbody>
-            {% for usuario in usuarios %}
-                {% for cliente in clientes %}
+            {% for usuario in usuarios_clientes %}
                 <tr>
                     <td>{{ usuario['usuario_id'] }} </td>
                     <td>{{ usuario['primer_nombre']}} </td>
-                    <td>{{ cliente['segundo_nombre'] }}</td>
+                    <td>{{ usuario['segundo_nombre'] }}</td>
                     <td>{{ usuario['primer_apellido'] }} </td>
-                    <td>{{ cliente['segundo_apellido'] }}</td>
+                    <td>{{ usuario['segundo_apellido'] }}</td>
                     <td>{{ usuario['correo_electronico'] }}</td>
-                    <td>{{ cliente['numero_telefono'] }}</td>
-                    <td>{{ cliente['dpi'] }}</td>
-                    <td>{{ cliente['direccion'] }}</td>
+                    <td>{{ usuario['numero_telefono'] }}</td>
+                    <td>{{ usuario['dpi'] }}</td>
+                    <td>{{ usuario['direccion'] }}</td>
                     <td>
                         <form action="{{ url_for('eliminar_usuario', usuario_id=usuario['usuario_id']) }}" method="post"
                             style="display:inline;">
@@ -64,7 +63,6 @@
                         </form>
                     </td>
                 </tr>
-                {% endfor %}
             {% endfor %}
         </tbody>
     </table>
