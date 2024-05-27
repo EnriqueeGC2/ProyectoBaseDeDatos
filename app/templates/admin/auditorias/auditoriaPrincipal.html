@@ -1,0 +1,67 @@
+{% extends 'index.html' %}
+
+{% block title %}Auditorias{% endblock %}
+
+{% block header_main_navigation %}
+<div class="container text-center" style="margin-top: 25px;">
+    <div class="row">
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('reporte_diario') }}">Reporte Diario</a>
+        </div>
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('reporte_usuario') }}">Cambio Por Usuario</a>
+        </div>
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('reporte_eventos') }}">Cambios Por Evento</a>
+        </div>
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('reporte_objetos') }}">Reporte Por Objetos</a>
+        </div>
+        <div class="col">
+            <a class="header-tools-admin" href="{{ url_for('reporte_fechas') }}">Reporte Por Fechas</a>
+        </div>
+    </div>
+    <div class="container" style="margin-top: 15px;">
+        <a style="font-family: cursive;">Bienvenido al panel de administración, </a><a
+            style="text-transform: uppercase; font-family: cursive;">{{ nombre }} </a>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container" style="margin-top: -30px;">
+    <h2>Lista de Usuarios</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Tipo Evento</th>
+                <th scope="col">Nombre Objeto</th>
+                <th scope="col">Esquema Objeto</th>
+                <th scope="col">Ejecutado Por</th>
+                <th scope="col">Fecha Ejecucion</th>
+                <th scope="col">Valor Anterior</th>
+                <th scope="col">Nuevo Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for auditoria in auditorias %}
+            <tr>
+                <td>{{ auditoria['AuditID'] }} </td>
+                <td>{{ auditoria['EventType']}} </td>
+                <td>{{ auditoria['ObjectName'] }}</td>
+                <td>{{ auditoria['ObjectSchema'] }} </td>
+                <td>{{ auditoria['ExecutedBy'] }}</td>
+                <td>{{ auditoria['ExecutionDate'] }}</td>
+                <td>{{ auditoria['OldValue'] }}</td>
+                <td>{{ auditoria['NewValue'] }}</td>
+
+                {% endfor %}
+        </tbody>
+    </table>
+</div>
+    
+    {% endblock %}

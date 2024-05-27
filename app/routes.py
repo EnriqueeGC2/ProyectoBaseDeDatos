@@ -365,3 +365,192 @@ def comprar():
     ejecutar_consulta(query_vaciar_carrito, (usuario_id,), fetch_results=False)
 
     return redirect(url_for('ver_carrito'))
+
+# Auditorias
+@app.route('/auditorias')
+def auditorias():
+    if 'user' in session:
+        query = "SELECT * FROM Auditoria;"
+        auditorias = ejecutar_consulta(query)
+        return render_template('admin/auditorias/auditoriaPrincipal.html', auditorias=auditorias, nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+    
+# Reporte Diario de Auditorias    
+@app.route('/auditorias/reporte-diario')
+def reporte_diario():
+    if 'user' in session:
+        query = """
+        SELECT 
+            AuditID, EventType, ObjectName, ObjectSchema, ExecutedBy, ExecutionDate, OldValue, NewValue
+        FROM 
+            [dbo].[Auditoria]
+        WHERE 
+            CAST(ExecutionDate AS DATE) = CAST(GETDATE() AS DATE)
+        ORDER BY 
+            ExecutionDate DESC;
+        """
+        auditorias = ejecutar_consulta(query)
+        return render_template('admin/auditorias/reporteDiario.html', auditorias=auditorias, nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+    
+# Reporte Semanal de Auditorias
+@app.route('/auditorias/reporte-semanal')
+def reporte_semanal():
+    if 'user' in session:
+        query = """
+        SELECT 
+            AuditID, EventType, ObjectName, ObjectSchema, ExecutedBy, ExecutionDate, OldValue, NewValue
+        FROM 
+            [dbo].[Auditoria]
+        WHERE 
+            DATEPART(WEEK, ExecutionDate) = DATEPART(WEEK, GETDATE())
+        ORDER BY 
+            ExecutionDate DESC;
+        """
+        auditorias = ejecutar_consulta(query)
+        return render_template('admin/auditorias/reporteSemanal.html', auditorias=auditorias, nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+    
+# Reporte Cambios por usuario auditoria
+@app.route('/auditorias/reporte-usuario', methods=['GET', 'POST']) 
+def reporte_usuario():
+    if 'user' in session:
+        total_query = """
+        SELECT 
+            ExecutedBy, COUNT(*) AS ChangeCount
+        FROM 
+            [dbo].[Auditoria]
+        GROUP BY 
+            ExecutedBy
+        ORDER BY 
+            ChangeCount DESC;
+        """
+        total_auditorias = ejecutar_consulta(total_query)
+
+        user_auditorias = None
+        if request.method == 'POST' and 'nombre' in request.form:
+            nombre = request.form['nombre']
+            user_query = """
+            SELECT 
+                AuditID, EventType, ObjectName, ObjectSchema, ExecutedBy, ExecutionDate, OldValue, NewValue
+            FROM 
+                [dbo].[Auditoria]
+            WHERE 
+                ExecutedBy = ?
+            ORDER BY 
+                ExecutionDate DESC;
+            """
+            user_auditorias = ejecutar_consulta(user_query, nombre)
+        
+        return render_template('admin/auditorias/reporteUsuario.html', 
+                               total_auditorias=total_auditorias, 
+                               user_auditorias=user_auditorias, 
+                               nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+
+# Reporte Cambios por eventos auditoria
+@app.route('/auditorias/reporte-eventos', methods=['GET', 'POST']) 
+def reporte_eventos():
+    if 'user' in session:
+        total_query = """
+        SELECT 
+            EventType, COUNT(*) AS EventCount
+        FROM 
+            [dbo].[Auditoria]
+        GROUP BY 
+            EventType 
+        ORDER BY 
+            EventCount DESC;
+        """
+        total_auditorias = ejecutar_consulta(total_query)
+
+        user_auditorias = None
+        if request.method == 'POST' and 'nombre' in request.form:
+            nombre = request.form['nombre']
+            user_query = """
+            SELECT 
+                AuditID, EventType, ObjectName, ObjectSchema, ExecutedBy, ExecutionDate, OldValue, NewValue
+            FROM 
+                [dbo].[Auditoria]
+            WHERE 
+                EventType = ?
+            ORDER BY 
+                ExecutionDate DESC;
+            """
+            user_auditorias = ejecutar_consulta(user_query, nombre)
+        
+        return render_template('admin/auditorias/reporteEvento.html', 
+                               total_auditorias=total_auditorias, 
+                               user_auditorias=user_auditorias, 
+                               nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+    
+# Reporte Cambios por objeto especifico auditoria
+@app.route('/auditorias/reporte-objetos', methods=['GET', 'POST'])
+def reporte_objetos():
+    if 'user' in session:
+        total_query = """
+        SELECT 
+            ObjectName, COUNT(*) AS ObjectCount
+        FROM 
+            [dbo].[Auditoria]
+        GROUP BY 
+            ObjectName
+        ORDER BY 
+            ObjectCount DESC;
+        """
+        total_auditorias = ejecutar_consulta(total_query)
+
+        user_auditorias = None
+        if request.method == 'POST' and 'nombre' in request.form:
+            nombre = request.form['nombre']
+            user_query = """
+            SELECT 
+                AuditID, EventType, ObjectName, ObjectSchema, ExecutedBy, ExecutionDate, OldValue, NewValue
+            FROM 
+                [dbo].[Auditoria]
+            WHERE 
+                ObjectName = ?
+            ORDER BY 
+                ExecutionDate DESC;
+            """
+            user_auditorias = ejecutar_consulta(user_query, nombre)
+        
+        return render_template('admin/auditorias/reporteObjeto.html', 
+                               total_auditorias=total_auditorias, 
+                               user_auditorias=user_auditorias, 
+                               nombre=session['user']['primer_nombre'])
+    else:
+        return redirect(url_for('inicioSesion'))
+    
+# Reporte Cambios por fechas auditoria
+@app.route('/auditorias/reporte-fechas', methods=['GET', 'POST'])
+def reporte_fechas():
+    resultados = None
+    if request.method == 'POST':
+        # Obtener las fechas del formulario
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+
+        # Ejecutar la consulta SQL
+        query = """
+            SELECT 
+                AuditID, EventType, ObjectName, ObjectSchema, ExecutedBy, ExecutionDate, OldValue, NewValue
+            FROM 
+                [dbo].[Auditoria]
+            WHERE 
+                ExecutionDate BETWEEN ? AND ?
+            ORDER BY 
+                ExecutionDate DESC;
+        """
+        args = (start_date, end_date)
+        resultados = ejecutar_consulta(query, args)
+
+    return render_template('admin/auditorias/reporteFechas.html', resultados=resultados)
+
+ 

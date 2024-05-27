@@ -6,3 +6,6 @@ Werkzeug
 flask-bcrypt
 pymysql
 datetime
+pandas
+smtplib
+reportlab

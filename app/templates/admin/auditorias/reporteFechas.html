@@ -1,0 +1,50 @@
+{% extends 'admin/auditorias/auditoriaPrincipal.html' %}
+{% block title %}Reporte Por Fechas{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Consulta de Auditoría</h2>
+    <form action="{{ url_for('reporte_fechas') }}" method="POST">
+        <div class="form-group">
+            <label for="start_date">Fecha de inicio:</label>
+            <input type="date" class="form-control" id="start_date" name="start_date">
+        </div>
+        <div class="form-group">
+            <label for="end_date">Fecha de fin:</label>
+            <input type="date" class="form-control" id="end_date" name="end_date">
+        </div>
+        <button type="submit" class="btn btn-primary">Consultar</button>
+    </form>
+</div>
+{% if resultados %}
+<div class="container mt-5">
+    <h2>Reporte de Auditoría</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Tipo Evento</th>
+                <th scope="col">Nombre Objeto</th>
+                <th scope="col">Esquema Objeto</th>
+                <th scope="col">Ejecutado Por</th>
+                <th scope="col">Fecha Ejecucion</th>
+                <th scope="col">Valor Anterior</th>
+                <th scope="col">Nuevo Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for auditoria in resultados %}
+            <tr>
+                <td>{{ auditoria['AuditID'] }} </td>
+                <td>{{ auditoria['EventType']}} </td>
+                <td>{{ auditoria['ObjectName'] }}</td>
+                <td>{{ auditoria['ObjectSchema'] }} </td>
+                <td>{{ auditoria['ExecutedBy'] }}</td>
+                <td>{{ auditoria['ExecutionDate'] }}</td>
+                <td>{{ auditoria['OldValue'] }}</td>
+                <td>{{ auditoria['NewValue'] }}</td>
+                {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

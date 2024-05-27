@@ -1,0 +1,67 @@
+{% extends 'admin/auditorias/auditoriaPrincipal.html' %}
+{% block title %}Reporte Por Objeto{% endblock %}
+{% block content %}
+<div class="container" style="margin-top: -30px;">
+    <h2>Reportes Por Objetos</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Objeto</th>
+                <th scope="col">Cambios Totales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for auditoria in total_auditorias %}
+            <tr>
+                <td>{{ auditoria['ObjectName'] }} </td>
+                <td>{{ auditoria['ObjectCount']}} </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container">
+    <h5> Ingresa el Nombre del Usuario a Generar Reporte:</h5>
+    <form action="{{ url_for('reporte_objetos') }}" method="POST">
+        <div class="form-group">
+            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del Objeto">
+        </div>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+</div>
+
+{% if user_auditorias %}
+<div class="container" style="margin-top: 20px;">
+    <h2>Reporte del Objeto: {{ request.form['nombre'] }}</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">AuditID</th>
+                <th scope="col">Tipo de Evento</th>
+                <th scope="col">Nombre del Objeto</th>
+                <th scope="col">Esquema del Objeto</th>
+                <th scope="col">Ejecutado Por</th>
+                <th scope="col">Fecha de Ejecución</th>
+                <th scope="col">Valor Antiguo</th>
+                <th scope="col">Valor Nuevo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for auditoria in user_auditorias %}
+            <tr>
+                <td>{{ auditoria['AuditID'] }}</td>
+                <td>{{ auditoria['EventType'] }}</td>
+                <td>{{ auditoria['ObjectName'] }}</td>
+                <td>{{ auditoria['ObjectSchema'] }}</td>
+                <td>{{ auditoria['ExecutedBy'] }}</td>
+                <td>{{ auditoria['ExecutionDate'] }}</td>
+                <td>{{ auditoria['OldValue'] }}</td>
+                <td>{{ auditoria['NewValue'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}
